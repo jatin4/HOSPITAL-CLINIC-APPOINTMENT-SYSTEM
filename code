@@ -1,0 +1,118 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ---------- data ----------
+struct Appointment {
+    int id;
+    string patient;
+    string phone;
+    int doctor;        // 1 to 3
+    string date;       // e.g. 2026-11-05
+    string time;       // e.g. 10:00
+    bool active;       // true = booked, false = cancelled
+};
+
+string doctors[3] = {"Dr. Sharma (General)", "Dr. Gupta (Heart)", "Dr. Kaur (Bones)"};
+Appointment list[100];
+int total = 0;         // number of appointments made so far
+
+// ---------- functions ----------
+void showDoctors() {
+    cout << "\nDoctors:\n";
+    for (int i = 0; i < 3; i++)
+        cout << i + 1 << ". " << doctors[i] << endl;
+}
+
+bool slotTaken(int doctor, string date, string time) {
+    for (int i = 0; i < total; i++)
+        if (list[i].active && list[i].doctor == doctor &&
+            list[i].date == date && list[i].time == time)
+            return true;
+    return false;
+}
+
+void bookAppointment() {
+    if (total == 100) {
+        cout << "Appointment list is full.\n";
+        return;
+    }
+    Appointment a;
+    cin.ignore();
+    cout << "Patient name: ";
+    getline(cin, a.patient);
+    cout << "Phone number: ";
+    getline(cin, a.phone);
+    showDoctors();
+    cout << "Choose doctor (1-3): ";
+    cin >> a.doctor;
+    if (a.doctor < 1 || a.doctor > 3) {
+        cout << "Invalid doctor.\n";
+        return;
+    }
+    cout << "Date (YYYY-MM-DD): ";
+    cin >> a.date;
+    cout << "Time (HH:MM): ";
+    cin >> a.time;
+
+    if (slotTaken(a.doctor, a.date, a.time)) {
+        cout << "Sorry, this doctor is already booked at that time.\n";
+        return;
+    }
+    a.id = total + 1;
+    a.active = true;
+    list[total] = a;
+    total++;
+    cout << "Appointment booked. Your appointment ID = " << a.id << endl;
+}
+
+void showAppointments() {
+    if (total == 0) {
+        cout << "No appointments yet.\n";
+        return;
+    }
+    cout << "\nID  Patient         Doctor                Date        Time   Status\n";
+    for (int i = 0; i < total; i++) {
+        cout << list[i].id << "   " << list[i].patient << "   "
+             << doctors[list[i].doctor - 1] << "   " << list[i].date << "  "
+             << list[i].time << "  " << (list[i].active ? "BOOKED" : "CANCELLED") << endl;
+    }
+}
+
+void cancelAppointment() {
+    int id;
+    cout << "Enter appointment ID to cancel: ";
+    cin >> id;
+    if (id < 1 || id > total) {
+        cout << "Appointment not found.\n";
+    } else if (!list[id - 1].active) {
+        cout << "Already cancelled.\n";
+    } else {
+        list[id - 1].active = false;
+        cout << "Appointment cancelled.\n";
+    }
+}
+
+// ---------- main ----------
+int main() {
+    int choice;
+    do {
+        cout << "\n--- HOSPITAL APPOINTMENT SYSTEM ---\n";
+        cout << "1. View doctors\n";
+        cout << "2. Book appointment\n";
+        cout << "3. View all appointments\n";
+        cout << "4. Cancel appointment\n";
+        cout << "0. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1) showDoctors();
+        else if (choice == 2) bookAppointment();
+        else if (choice == 3) showAppointments();
+        else if (choice == 4) cancelAppointment();
+        else if (choice != 0) cout << "Invalid choice.\n";
+    } while (choice != 0);
+
+    cout << "Thank you!\n";
+    return 0;
+}
